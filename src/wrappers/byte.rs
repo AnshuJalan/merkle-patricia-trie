@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct Byte(pub u8);
 
 impl Byte {

@@ -1,18 +1,16 @@
-use super::byte::Byte;
-
+#[derive(Clone, Copy, PartialEq)]
 pub struct Nibble(u8);
 
 impl Nibble {
-    pub fn from_byte(byte: Byte) -> (Self, Self) {
-        (Self(byte.0 >> 4), Self(byte.0 % 16))
+    pub fn from_byte(byte: u8) -> (Self, Self) {
+        (Self(byte >> 4), Self(byte % 16))
     }
 
-    pub fn from_bytes(bytes: Vec<Byte>) -> Vec<Self> {
-        let mut nibbles = vec![];
-        for byte in bytes {
-            nibbles.push(Self(byte.0 >> 4));
-            nibbles.push(Self(byte.0 % 16));
-        }
-        nibbles
+    pub fn to_u8(self) -> u8 {
+        self.0
+    }
+
+    pub fn eq(&self, a: &Nibble) -> bool {
+        return *self == *a;
     }
 }

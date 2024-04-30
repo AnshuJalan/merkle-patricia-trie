@@ -1,6 +1,13 @@
-use crate::wrappers::{byte::Byte, nibble::Nibble};
+use crate::wrappers::path::Path;
 
+#[derive(Clone)]
 pub struct Leaf {
-    pub path: Vec<Nibble>,
-    pub value: Vec<Byte>,
+    pub path: Path,
+    pub value: Vec<u8>,
+}
+
+impl Leaf {
+    pub fn new(p: Path, v: Vec<u8>) -> Self {
+        Self { path: p, value: v }
+    }
 }

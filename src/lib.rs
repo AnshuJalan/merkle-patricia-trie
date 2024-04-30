@@ -1,4 +1,5 @@
 mod nodes;
+mod trie;
 mod wrappers;
 
 pub fn add(left: usize, right: usize) -> usize {
