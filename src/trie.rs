@@ -13,6 +13,45 @@ impl Trie {
         self.root = Self::insert_rec(self.root.clone(), path, 0, val)
     }
 
+    pub fn get(&self, key: Vec<u8>) -> Option<Vec<u8>> {
+        let path = Path::from_bytes(key);
+        Self::get_rec(&self.root, path, 0)
+    }
+
+    fn get_rec(node: &Node, path: Path, path_index: usize) -> Option<Vec<u8>> {
+        let path_suffix = path.suffix(path_index);
+        match node {
+            Node::Empty => None,
+            Node::Leaf(leaf) => {
+                let matched_length = Path::match_prefix(&path_suffix, &leaf.path);
+                if matched_length == path_suffix.len() && matched_length == leaf.path.len() {
+                    Some(leaf.value.clone())
+                } else {
+                    None
+                }
+            }
+            Node::Branch(branch) => {
+                if path_suffix.len() == 0 {
+                    branch.value.clone()
+                } else {
+                    Self::get_rec(
+                        &branch.branches[path_suffix.get_nibble_at(0).to_u8() as usize],
+                        path_suffix,
+                        path_index + 1,
+                    )
+                }
+            }
+            Node::Extension(extension) => {
+                let matched_length = Path::match_prefix(&path_suffix, &extension.path);
+                if matched_length == path_suffix.len() && matched_length == extension.path.len() {
+                    Self::get_rec(&extension.next, path, path_index + matched_length)
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
     fn insert_rec(node: Node, path: Path, path_index: usize, val: Vec<u8>) -> Node {
         let path_suffix = path.suffix(path_index);
         match node {
@@ -65,7 +104,7 @@ impl Trie {
                 let branch_nibble = path_suffix.get_nibble_at(0).to_u8() as usize;
                 let next_node = Self::insert_rec(
                     branch.branches[branch_nibble].clone(),
-                    path_suffix,
+                    path,
                     path_index + 1,
                     val,
                 );
@@ -76,12 +115,8 @@ impl Trie {
                 let matched_length = Path::match_prefix(&path_suffix, &extension.path);
 
                 if matched_length == extension.path.len() {
-                    extension.next = Self::insert_rec(
-                        extension.next,
-                        path_suffix,
-                        path_index + matched_length,
-                        val,
-                    );
+                    extension.next =
+                        Self::insert_rec(extension.next, path, path_index + matched_length, val);
                     return Node::Extension(extension);
                 } else if matched_length == 0 {
                     let mut branch = branch::Branch::new(Default::default(), None);
@@ -96,18 +131,13 @@ impl Trie {
                     };
                     branch.set_branch(matched_extention_node_nibble, matched_extension_node);
 
-                    return Self::insert_rec(
-                        Node::from_branch(branch),
-                        path_suffix,
-                        path_index,
-                        val,
-                    );
+                    return Self::insert_rec(Node::from_branch(branch), path, path_index, val);
                 }
 
                 extension.path = extension.path.prefix(matched_length);
                 extension.next = Self::insert_rec(
                     Node::new_extension_node(extension.path.suffix(matched_length), extension.next),
-                    path_suffix,
+                    path,
                     path_index + matched_length,
                     val,
                 );
