@@ -1,6 +1,6 @@
 use crate::nodes::Node;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Branch {
     pub branches: [Node; 16],
     pub value: Option<Vec<u8>>,

@@ -3,6 +3,7 @@ use crate::{
     wrappers::path::Path,
 };
 
+#[derive(Debug)]
 pub struct Trie {
     root: Node,
 }
@@ -36,14 +37,14 @@ impl Trie {
                 } else {
                     Self::get_rec(
                         &branch.branches[path_suffix.get_nibble_at(0).to_u8() as usize],
-                        path_suffix,
+                        path,
                         path_index + 1,
                     )
                 }
             }
             Node::Extension(extension) => {
                 let matched_length = Path::match_prefix(&path_suffix, &extension.path);
-                if matched_length == path_suffix.len() && matched_length == extension.path.len() {
+                if matched_length == extension.path.len() {
                     Self::get_rec(&extension.next, path, path_index + matched_length)
                 } else {
                     None
@@ -80,8 +81,10 @@ impl Trie {
                     );
                 }
                 if matched_length < leaf.path.len() {
-                    let next_leaf_node =
-                        Node::new_leaf_node(leaf.path.suffix(matched_length + 1), val.clone());
+                    let next_leaf_node = Node::new_leaf_node(
+                        leaf.path.suffix(matched_length + 1),
+                        leaf.value.clone(),
+                    );
                     branch.set_branch(
                         leaf.path.get_nibble_at(matched_length).to_u8() as usize,
                         next_leaf_node,
@@ -144,5 +147,28 @@ impl Trie {
                 Node::Extension(extension)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_trie_works_correctly() {
+        let mut trie = Trie { root: Node::Empty };
+
+        let k1 = "Jake".as_bytes().to_vec();
+        let k2 = "Mike".as_bytes().to_vec();
+
+        let v1 = "Paul".as_bytes().to_vec();
+        let v2 = "Tyson".as_bytes().to_vec();
+
+        trie.put(k1.clone(), v1.clone());
+        trie.put(k2.clone(), v2.clone());
+
+        assert!(trie.get(k1).is_some_and(|v| v == v1));
+        assert!(trie.get(k2).is_some_and(|v| v == v2));
+        assert!(trie.get("Logan".as_bytes().to_vec()).is_none());
     }
 }

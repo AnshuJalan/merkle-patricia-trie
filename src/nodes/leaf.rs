@@ -1,6 +1,6 @@
 use crate::wrappers::path::Path;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Leaf {
     pub path: Path,
     pub value: Vec<u8>,

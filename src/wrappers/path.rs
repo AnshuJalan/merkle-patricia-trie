@@ -1,6 +1,6 @@
 use crate::wrappers::nibble::Nibble;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Path(Vec<Nibble>);
 
 impl Path {

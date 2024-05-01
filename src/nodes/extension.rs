@@ -1,6 +1,6 @@
 use crate::{nodes::Node, wrappers::path::Path};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Extension {
     pub path: Path,
     pub next: Node,
